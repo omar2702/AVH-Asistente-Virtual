@@ -152,8 +152,8 @@ public class Avatar : MonoBehaviour
             else {
                 AudioClip audioClip = DownloadHandlerAudioClip.GetContent(requestAudio);
                 ControllerSound.Instance.ExecuteSound(audioClip); // Audio
-                                                                  // Configurar la animación para que se reproduzca en bucle
-                AnimationState animationState = avatarAniamtion["Explicar"]; // Reemplaza "Explicar" con el nombre de tu animación
+                // Configurar la animación para que se reproduzca en bucle
+                AnimationState animationState = avatarAniamtion["Explicar"];
                 animationState.wrapMode = WrapMode.Loop;
 
                 // Iniciar la animación en bucle
