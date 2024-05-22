@@ -61,6 +61,11 @@ sysinfo.txt
 *.unitypackage
 *.app
 
+# Include scenes and assets
+!Assets/**/*.*
+!Assets/**/*.meta
+!Assets/**
+
 # Crashlytics generated file
 crashlytics-build.properties
 
