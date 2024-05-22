@@ -15,8 +15,11 @@ public class Avatar : MonoBehaviour
 
     private AudioClip clip; //audio o grabación del estudiante
     private bool isRecording = false;
+    private int recordingDuration = 15;
+    private Coroutine recordingCoroutine;
     private byte[] audioBytesUser; //bytes del audio del estudiante
     private float lastSoundTime = 0f;
+    private bool spokeOnce = false;
     public static event System.Action Completed; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
     [SerializeField] private AudioClip bell;
@@ -32,12 +35,14 @@ public class Avatar : MonoBehaviour
     }
 
 
-        void Update()
-    {
+    void Update() {
         if(isRecording) { //detectar si no se habla durante 3 segundos para parar de grabar y mandarlo a lambda
             if (clip != null && Microphone.GetPosition(null) > 0 && IsSilent()) {
                 
-                if (Time.time - lastSoundTime > 3.0f) {
+                if ((Time.time - lastSoundTime > 2.0f) && spokeOnce == true) {
+                    StopRecording();
+                }
+                else if ((Time.time - lastSoundTime > 5.0f) && spokeOnce == false) {
                     StopRecording();
                 }
             }
@@ -47,16 +52,32 @@ public class Avatar : MonoBehaviour
         }     
     }
 
+    IEnumerator StopRecordingAfterDuration(int duration) {
+        // Espera durante la duración especificada
+        yield return new WaitForSeconds(duration);
+
+        if (isRecording)
+        {
+            StopRecording();
+        }
+    }
+
     public void StartRecording() { //esta función se llama desde SpeechRecognizer
-        clip = Microphone.Start(null, false, 15, 44100);
+        clip = Microphone.Start(null, false, recordingDuration, 44100);
         isRecording = true;
+        spokeOnce = false;
         lastSoundTime = Time.time;
+        recordingCoroutine = StartCoroutine(StopRecordingAfterDuration(recordingDuration));
     }
 
     public void StopRecording() {
         if (!isRecording) return;
         var position = Microphone.GetPosition(null);
         Microphone.End(null);
+        if (recordingCoroutine != null) {
+            StopCoroutine(recordingCoroutine);
+            recordingCoroutine = null;
+        }
         var samples = new float[position * clip.channels];
         clip.GetData(samples, 0);
         isRecording = false;
@@ -97,8 +118,12 @@ public class Avatar : MonoBehaviour
         if (microphonePosition < 0) return false;
         clip.GetData(samples, microphonePosition);
         float averageLevel = GetAverageVolume(samples);
-        float threshold = 0.03f; 
-        return averageLevel < threshold;
+        float threshold = 0.04f; 
+        if (averageLevel < threshold) {
+            return true;
+        }
+        spokeOnce = true;
+        return false;
     }
 
     private float GetAverageVolume(float[] samples) {
@@ -108,7 +133,7 @@ public class Avatar : MonoBehaviour
             sum += Mathf.Abs(samples[i]);
         }
         return sum / samples.Length;
-    }    
+    }      
 
     private IEnumerator SendRecording() {
         string base64String = System.Convert.ToBase64String(audioBytesUser);
@@ -127,7 +152,7 @@ public class Avatar : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success) {
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
-        } 
+            } 
         else {
             ControllerSound.SoundCompleted += CompletedResponse; //suscribirse al evento que indica cuando terminó de reproducirse la respuesta
             var jsonResponse = request.downloadHandler.text;
@@ -152,7 +177,7 @@ public class Avatar : MonoBehaviour
             else {
                 AudioClip audioClip = DownloadHandlerAudioClip.GetContent(requestAudio);
                 ControllerSound.Instance.ExecuteSound(audioClip); // Audio
-                // Configurar la animación para que se reproduzca en bucle
+                // Bucle de la aniamción
                 AnimationState animationState = avatarAniamtion["Explicar"];
                 animationState.wrapMode = WrapMode.Loop;
 

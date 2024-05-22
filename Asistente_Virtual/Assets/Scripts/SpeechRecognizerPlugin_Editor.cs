@@ -20,7 +20,7 @@ public class SpeechRecognizerPlugin_Editor : SpeechRecognizerPlugin
             speechRecognizer.OnResult("start listening test~start listening test~start listening test");
     }
 
-    public override void StartListening(bool setContinuousListening = false, string newLanguage = "es-pe", int newMaxResults = 10)
+    public override void StartListening(bool setContinuousListening = false, string newLanguage = "en-US", int newMaxResults = 10)
     {
         StartListening();
     }        
