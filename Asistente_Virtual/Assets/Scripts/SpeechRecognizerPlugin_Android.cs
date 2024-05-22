@@ -21,7 +21,7 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
         instance.Call("StartListening", this.isContinuousListening, this.language, this.maxResults);
     }
 
-    public override void StartListening(bool isContinuous = false, string newLanguage = "es-pe", int newMaxResults = 10)
+    public override void StartListening(bool isContinuous = false, string newLanguage = "en-US", int newMaxResults = 10)
     {
         instance.Call("StartListening", isContinuous, language, maxResults);
     }
