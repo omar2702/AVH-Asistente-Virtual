@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589246, b: 0.2978263, a: 1}
+  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589245, b: 0.2978263, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -550,7 +550,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avatarAniamtion: {fileID: 0}
   animationName: Explicar
-  bell: {fileID: 8300000, guid: f00376a6027281f499ffecce2da07b60, type: 3}
+  waitSound1: {fileID: 8300000, guid: 4995312c71f33aa4da2cdfd37695c613, type: 3}
+  waitSound2: {fileID: 8300000, guid: 8d5383f8c13b8f84abca0ab25035ca2e, type: 3}
+  waitSound3: {fileID: 8300000, guid: 7d9211d01b7f1f0479bf99c4c99bcaef, type: 3}
 --- !u!1001 &1642282147
 PrefabInstance:
   m_ObjectHideFlags: 0

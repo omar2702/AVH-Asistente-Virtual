@@ -10,10 +10,12 @@ using UnityEngine.Events;
 
 public class Avatar : MonoBehaviour
 {
-    public Animation avatarAniamtion;
+    public Animation avatarAnimation;
     public string animationName = "Explicar";
+    private AnimationState animationState; //Sergio 22/05/2024
 
     private AudioClip clip; //audio o grabación del estudiante
+    private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
     private bool isRecording = false;
     private int recordingDuration = 15;
     private Coroutine recordingCoroutine;
@@ -22,13 +24,16 @@ public class Avatar : MonoBehaviour
     private bool spokeOnce = false;
     public static event System.Action Completed; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
-    [SerializeField] private AudioClip bell;
+    // [SerializeField] private AudioClip bell;
+    [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
+    [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
+    [SerializeField] private AudioClip waitSound3; //Sergio 22/05/2024
 
     void Start() {
         // Comprueba que el componente Animator esté asignado
-        if (avatarAniamtion == null)
+        if (avatarAnimation == null)
         {
-            avatarAniamtion = GetComponent<Animation>();
+            avatarAnimation = GetComponent<Animation>();
         }
 
         // Llama al método para reproducir el audio con la animación
@@ -53,7 +58,7 @@ public class Avatar : MonoBehaviour
     }
 
     IEnumerator StopRecordingAfterDuration(int duration) {
-        // Espera durante la duración especificada
+        // Espera durante el tiempo especificado
         yield return new WaitForSeconds(duration);
 
         if (isRecording)
@@ -82,7 +87,7 @@ public class Avatar : MonoBehaviour
         clip.GetData(samples, 0);
         isRecording = false;
         audioBytesUser = EncodeAsWAV(samples, clip.frequency, clip.channels);
-        ControllerSound.Instance.ExecuteSound(bell);
+        // ControllerSound.Instance.ExecuteSound(bell);
         StartCoroutine(SendRecording());
     }
 
@@ -143,6 +148,12 @@ public class Avatar : MonoBehaviour
         fileData.background = background;
         string json = JsonUtility.ToJson(fileData);
 
+        //Sergio 22/05/2024
+        AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3 };
+        AudioClip waitSound = waitSounds[UnityEngine.Random.Range(0, waitSounds.Length)];
+        ControllerSound.Instance.ExecuteSound(waitSound);
+        //Fin Sergio
+
         var request = new UnityWebRequest("https://h3f4f43iybmddlglvzxbe23ksm0yampi.lambda-url.us-east-2.on.aws/", "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         request.uploadHandler = (UploadHandler) new UploadHandlerRaw(bodyRaw);
@@ -154,7 +165,6 @@ public class Avatar : MonoBehaviour
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
             } 
         else {
-            ControllerSound.SoundCompleted += CompletedResponse; //suscribirse al evento que indica cuando terminó de reproducirse la respuesta
             var jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
             // Analizar el JSON
@@ -175,17 +185,15 @@ public class Avatar : MonoBehaviour
                 Debug.LogError(requestAudio.error);
                 
             else {
-                AudioClip audioClip = DownloadHandlerAudioClip.GetContent(requestAudio);
-                ControllerSound.Instance.ExecuteSound(audioClip); // Audio
-                // Bucle de la aniamción
-                AnimationState animationState = avatarAniamtion["Explicar"];
-                animationState.wrapMode = WrapMode.Loop;
-
-                // Iniciar la animación en bucle
-                avatarAniamtion.Play("Explicar");
-
-                // Iniciar la corutina para detener la animación al final del audio
-                StartCoroutine(StopAnimationWhenAudioEnds(animationState));
+                //Sergio 22/05/2024
+                responseClip = DownloadHandlerAudioClip.GetContent(requestAudio);
+                if (!ControllerSound.Instance.IsPlaying()) { //se terminó de reproducir el audio de espera
+                    PlayResponseClip();
+                } else {
+                    //Esperar que termine el audio de espera
+                    ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
+                }
+                //Fin Sergio
             }
         }
     }
@@ -194,15 +202,38 @@ public class Avatar : MonoBehaviour
     {
         yield return new WaitForSeconds(clip.length);
         // Detener la animación después de que el audio termine
-        avatarAniamtion.Stop("Explicar");
+        avatarAnimation.Stop("Explicar");
 
         // Opcionalmente, restablecer la animación al primer frame
         animationState.time = 0;
-        avatarAniamtion.Sample();
-        avatarAniamtion.Stop();
+        avatarAnimation.Sample();
+        avatarAnimation.Stop();
+    }
+
+    //Sergio 22/05/2024
+    public void WaitForSoundAndPlayResponse() {
+        ControllerSound.SoundCompleted -= WaitForSoundAndPlayResponse;
+        PlayResponseClip();
+    }
+
+    //Sergio 22/05/2024
+    public void PlayResponseClip() {
+        // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
+        ControllerSound.SoundCompleted += CompletedResponse;
+        ControllerSound.Instance.ExecuteSound(responseClip);
+        animationState = avatarAnimation["Explicar"];
+        animationState.wrapMode = WrapMode.Loop;
+        // Iniciar la animación en bucle
+        avatarAnimation.Play("Explicar");
     }
 
     public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
+        //Sergio 22/05/2024
+        avatarAnimation.Stop("Explicar");
+        animationState.time = 0;
+        avatarAnimation.Sample();
+        avatarAnimation.Stop();
+        //Fin Sergio
         ControllerSound.SoundCompleted -= CompletedResponse; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Completed?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
