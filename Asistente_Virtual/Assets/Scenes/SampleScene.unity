@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589245, b: 0.2978263, a: 1}
+  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589246, b: 0.2978263, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -523,6 +523,10 @@ PrefabInstance:
       propertyPath: m_Animation
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2223639932434330405, guid: 163a5977557cc764d993088c4eab17be, type: 3}
+      propertyPath: m_CullingType
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -548,7 +552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d4d2e0dd3ddf43409f5cde98f35159d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  avatarAniamtion: {fileID: 0}
+  avatarAnimation: {fileID: 0}
   animationName: Explicar
   waitSound1: {fileID: 8300000, guid: 4995312c71f33aa4da2cdfd37695c613, type: 3}
   waitSound2: {fileID: 8300000, guid: 8d5383f8c13b8f84abca0ab25035ca2e, type: 3}

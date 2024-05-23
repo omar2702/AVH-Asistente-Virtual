@@ -198,18 +198,6 @@ public class Avatar : MonoBehaviour
         }
     }
 
-    private IEnumerator StopAnimationWhenAudioEnds(AnimationState animationState) 
-    {
-        yield return new WaitForSeconds(clip.length);
-        // Detener la animación después de que el audio termine
-        avatarAnimation.Stop("Explicar");
-
-        // Opcionalmente, restablecer la animación al primer frame
-        animationState.time = 0;
-        avatarAnimation.Sample();
-        avatarAnimation.Stop();
-    }
-
     //Sergio 22/05/2024
     public void WaitForSoundAndPlayResponse() {
         ControllerSound.SoundCompleted -= WaitForSoundAndPlayResponse;
@@ -221,23 +209,36 @@ public class Avatar : MonoBehaviour
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
         ControllerSound.SoundCompleted += CompletedResponse;
         ControllerSound.Instance.ExecuteSound(responseClip);
-        animationState = avatarAnimation["Explicar"];
+        animationState = avatarAnimation[animationName]; //Omar 23/05/2024
         animationState.wrapMode = WrapMode.Loop;
         // Iniciar la animación en bucle
-        avatarAnimation.Play("Explicar");
+        avatarAnimation.Play(animationName); //Omar 23/05/2024
     }
 
     public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
+        //Detener la animacion y resetearla al estado inicial
+        avatarAnimation.Stop(animationName); //Omar 23/05/2024
         //Sergio 22/05/2024
-        avatarAnimation.Stop("Explicar");
-        animationState.time = 0;
-        avatarAnimation.Sample();
-        avatarAnimation.Stop();
+        animationState.time = 0; // Resetear el tiempo de la animación
+        avatarAnimation.Sample(); // Mostrar la animación en el priemr fotograma
+        // Asegurarse de que la animación esté en el estado inicial
+        EnsureAnimationAtStart();
         //Fin Sergio
         ControllerSound.SoundCompleted -= CompletedResponse; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Completed?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
     }
+
+    // Omar 23/05/2024
+    private void EnsureAnimationAtStart()
+    {
+        // Verificar que la animación se haya resamplado correctamente al primer fotograma    
+        avatarAnimation[animationName].enabled = true;
+        avatarAnimation[animationName].weight = 1f;
+        avatarAnimation.Sample();
+        avatarAnimation[animationName].enabled = false;
+    }
+    
 
     [System.Serializable]
     public class FileData {
