@@ -32,4 +32,8 @@ public class ControllerSound : MonoBehaviour
         yield return new WaitUntil(() => !audioSource.isPlaying);
         SoundCompleted?.Invoke(); //se dispara el evento
     }
+
+    public bool IsPlaying() {
+        return audioSource.isPlaying;
+    }
 }
