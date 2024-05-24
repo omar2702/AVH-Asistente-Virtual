@@ -554,9 +554,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   avatarAnimation: {fileID: 0}
   animationName: Explicar
-  waitSound1: {fileID: 8300000, guid: 4995312c71f33aa4da2cdfd37695c613, type: 3}
-  waitSound2: {fileID: 8300000, guid: 8d5383f8c13b8f84abca0ab25035ca2e, type: 3}
-  waitSound3: {fileID: 8300000, guid: 7d9211d01b7f1f0479bf99c4c99bcaef, type: 3}
+  waitSound1: {fileID: 8300000, guid: b93258d7715bc5f4eb0b3f2fb3debf67, type: 3}
+  waitSound2: {fileID: 8300000, guid: 2571cb7ae517c7649b72f6ea7d10531b, type: 3}
+  waitSound3: {fileID: 8300000, guid: 9cd5d456ac5fffa46876bcc061eb3600, type: 3}
+  waitSound4: {fileID: 8300000, guid: 677c9d2f04e25dc49bd3fa6bdbebb899, type: 3}
+  errorSound: {fileID: 8300000, guid: 09b1abb51702a684dacd20d58a2e68ba, type: 3}
 --- !u!1001 &1642282147
 PrefabInstance:
   m_ObjectHideFlags: 0
