@@ -30,7 +30,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     private void StartListening() {
         plugin.StartListening();
         plugin.SetContinuousListening(true);
-        plugin.SetLanguageForNextRecognition("en-ES");
+        plugin.SetLanguageForNextRecognition("en-US");
         plugin.SetMaxResultsForNextRecognition(10);
     }
 
@@ -44,10 +44,9 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
 
         for (int i = 0; i < result.Length; i++)
         {
-            if(result[i].ToLower().Contains("panc"))
+            if(result[i].ToLower().Contains("akira") || result[i].ToLower().Contains("akima") || result[i].ToLower().Contains("aki") || result[i].ToLower().Contains("iki"))
             {
                 keywordFound = true;
-                break;
             }
             
         }

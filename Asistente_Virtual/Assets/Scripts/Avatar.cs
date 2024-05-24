@@ -28,6 +28,8 @@ public class Avatar : MonoBehaviour
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound3; //Sergio 22/05/2024
+    [SerializeField] private AudioClip waitSound4; //Sergio 23/05/2024
+    [SerializeField] private AudioClip errorSound; //Sergio 23/05/2024
 
     void Start() {
         // Comprueba que el componente Animator esté asignado
@@ -149,7 +151,7 @@ public class Avatar : MonoBehaviour
         string json = JsonUtility.ToJson(fileData);
 
         //Sergio 22/05/2024
-        AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3 };
+        AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3, waitSound4 };
         AudioClip waitSound = waitSounds[UnityEngine.Random.Range(0, waitSounds.Length)];
         ControllerSound.Instance.ExecuteSound(waitSound);
         //Fin Sergio
@@ -163,7 +165,16 @@ public class Avatar : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success) {
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
-            } 
+            //Sergio 23/05/2024
+            if (!ControllerSound.Instance.IsPlaying()) {
+                responseClip = errorSound;
+                PlayResponseClip();
+            } else {
+                //Esperar que termine el audio de espera
+                ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
+            }
+            //Fin Sergio
+        } 
         else {
             var jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
