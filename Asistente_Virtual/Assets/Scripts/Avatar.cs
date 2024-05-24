@@ -17,7 +17,7 @@ public class Avatar : MonoBehaviour
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
     private bool isRecording = false;
-    private int recordingDuration = 15;
+    private int recordingDuration = 18;
     private Coroutine recordingCoroutine;
     private byte[] audioBytesUser; //bytes del audio del estudiante
     private float lastSoundTime = 0f;
@@ -46,7 +46,7 @@ public class Avatar : MonoBehaviour
         if(isRecording) { //detectar si no se habla durante 3 segundos para parar de grabar y mandarlo a lambda
             if (clip != null && Microphone.GetPosition(null) > 0 && IsSilent()) {
                 
-                if ((Time.time - lastSoundTime > 2.0f) && spokeOnce == true) {
+                if ((Time.time - lastSoundTime > 2.5f) && spokeOnce == true) {
                     StopRecording();
                 }
                 else if ((Time.time - lastSoundTime > 5.0f) && spokeOnce == false) {
@@ -125,7 +125,7 @@ public class Avatar : MonoBehaviour
         if (microphonePosition < 0) return false;
         clip.GetData(samples, microphonePosition);
         float averageLevel = GetAverageVolume(samples);
-        float threshold = 0.04f; 
+        float threshold = 0.03f; 
         if (averageLevel < threshold) {
             return true;
         }
@@ -193,7 +193,15 @@ public class Avatar : MonoBehaviour
             yield return requestAudio.SendWebRequest();
 
             if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError))
-                Debug.LogError(requestAudio.error);
+                //Sergio 24/05/2024
+                if (!ControllerSound.Instance.IsPlaying()) {
+                    responseClip = errorSound;
+                    PlayResponseClip();
+                } else {
+                    //Esperar que termine el audio de espera
+                    ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
+                }
+                //Fin Sergio
                 
             else {
                 //Sergio 22/05/2024
