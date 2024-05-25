@@ -192,7 +192,7 @@ public class Avatar : MonoBehaviour
             UnityWebRequest requestAudio = UnityWebRequestMultimedia.GetAudioClip(_uri, AudioType.MPEG);
             yield return requestAudio.SendWebRequest();
 
-            if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError))
+            if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError)){
                 //Sergio 24/05/2024
                 if (!ControllerSound.Instance.IsPlaying()) {
                     responseClip = errorSound;
@@ -202,7 +202,7 @@ public class Avatar : MonoBehaviour
                     ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
                 }
                 //Fin Sergio
-                
+            }    
             else {
                 //Sergio 22/05/2024
                 responseClip = DownloadHandlerAudioClip.GetContent(requestAudio);
