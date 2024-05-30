@@ -260,13 +260,12 @@ public class Avatar : MonoBehaviour
         //Animaciones
     public void AnimationWait() // Animacion Esperar
     {
-        avatarAnimator.SetTrigger(WaitTrigger); //Omar 27/05/2024
+            avatarAnimator.SetTrigger(WaitTrigger);
     }
 
     public void AnimationStand()
     {
-        // Activar el trigger para iniciar la animación "Stand"
-        avatarAnimator.SetTrigger(StandTrigger);
+            avatarAnimator.SetTrigger(StandTrigger);
     }
 
     public void AnimationExplain()
