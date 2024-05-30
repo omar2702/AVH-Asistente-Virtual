@@ -7,12 +7,15 @@ using TMPro;
 using System.Text;
 using System;
 using UnityEngine.Events;
+using UnityEngine.AI;
 
 public class Avatar : MonoBehaviour
 {
-    public Animation avatarAnimation;
-    public string animationName = "Explicar";
-    private AnimationState animationState; //Sergio 22/05/2024
+    public Animator avatarAnimator;
+
+    private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
+    private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
+    private static readonly int StandTrigger = Animator.StringToHash("AHStand");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
@@ -32,13 +35,8 @@ public class Avatar : MonoBehaviour
     [SerializeField] private AudioClip errorSound; //Sergio 23/05/2024
 
     void Start() {
-        // Comprueba que el componente Animator esté asignado
-        if (avatarAnimation == null)
-        {
-            avatarAnimation = GetComponent<Animation>();
-        }
-
-        // Llama al método para reproducir el audio con la animación
+        avatarAnimator = GetComponent<Animator>();
+        AnimationStand();
     }
 
 
@@ -75,6 +73,7 @@ public class Avatar : MonoBehaviour
         spokeOnce = false;
         lastSoundTime = Time.time;
         recordingCoroutine = StartCoroutine(StopRecordingAfterDuration(recordingDuration));
+        AnimationStand();
     }
 
     public void StopRecording() {
@@ -154,6 +153,9 @@ public class Avatar : MonoBehaviour
         AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3, waitSound4 };
         AudioClip waitSound = waitSounds[UnityEngine.Random.Range(0, waitSounds.Length)];
         ControllerSound.Instance.ExecuteSound(waitSound);
+        AnimationWait(); // Omar 29/05/2024
+        // Iniciar la corutina para esperar al final del audio y cambiar la animación
+        //StartCoroutine(SynchronizeAnimationWithAudio(waitSound.length, PlayResponseClip));
         //Fin Sergio
 
         var request = new UnityWebRequest("https://h3f4f43iybmddlglvzxbe23ksm0yampi.lambda-url.us-east-2.on.aws/", "POST");
@@ -224,38 +226,19 @@ public class Avatar : MonoBehaviour
     }
 
     //Sergio 22/05/2024
-    public void PlayResponseClip() {
+   public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
         ControllerSound.SoundCompleted += CompletedResponse;
         ControllerSound.Instance.ExecuteSound(responseClip);
-        animationState = avatarAnimation[animationName]; //Omar 23/05/2024
-        animationState.wrapMode = WrapMode.Loop;
-        // Iniciar la animación en bucle
-        avatarAnimation.Play(animationName); //Omar 23/05/2024
+        AnimationExplain();
+        //StartCoroutine(SynchronizeAnimationWithAudio(responseClip.length, AnimationStand));
     }
 
     public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
-        //Detener la animacion y resetearla al estado inicial
-        avatarAnimation.Stop(animationName); //Omar 23/05/2024
-        //Sergio 22/05/2024
-        animationState.time = 0; // Resetear el tiempo de la animación
-        avatarAnimation.Sample(); // Mostrar la animación en el priemr fotograma
-        // Asegurarse de que la animación esté en el estado inicial
-        EnsureAnimationAtStart();
-        //Fin Sergio
         ControllerSound.SoundCompleted -= CompletedResponse; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Completed?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
-    }
-
-    // Omar 23/05/2024
-    private void EnsureAnimationAtStart()
-    {
-        // Verificar que la animación se haya resamplado correctamente al primer fotograma    
-        avatarAnimation[animationName].enabled = true;
-        avatarAnimation[animationName].weight = 1f;
-        avatarAnimation.Sample();
-        avatarAnimation[animationName].enabled = false;
+        AnimationStand();
     }
     
 
@@ -274,4 +257,22 @@ public class Avatar : MonoBehaviour
         public string role;
         public string content;
     }
+        //Animaciones
+    public void AnimationWait() // Animacion Esperar
+    {
+        avatarAnimator.SetTrigger(WaitTrigger); //Omar 27/05/2024
+    }
+
+    public void AnimationStand()
+    {
+        // Activar el trigger para iniciar la animación "Stand"
+        avatarAnimator.SetTrigger(StandTrigger);
+    }
+
+    public void AnimationExplain()
+    {
+        // Sincronizar la animación "Explain" con el audio y cambiar a "Stand" cuando termine
+        avatarAnimator.SetTrigger(ExplainTrigger);
+    }
+
 }
