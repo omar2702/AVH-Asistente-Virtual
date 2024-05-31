@@ -1,0 +1,25 @@
+name: Deploy to AWS Lambda on Deploy Branch
+
+on:
+  push:
+    branches:
+        - feature/aws-lambda # Rama de desarrollo / Pruebas
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Especifica que los trabajos se ejecutarán en una máquina virtual con la última versión de Ubuntu
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2  # Clona el repositorio en el runner
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: | # Instala las dependencias de Python
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt 
