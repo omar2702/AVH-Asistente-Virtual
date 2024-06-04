@@ -16,6 +16,7 @@ public class Avatar : MonoBehaviour
     private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
     private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
     private static readonly int StandTrigger = Animator.StringToHash("AHStand");
+    private static readonly int listenTrigger = Animator.StringToHash("AHListen");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
@@ -231,7 +232,6 @@ public class Avatar : MonoBehaviour
         ControllerSound.SoundCompleted += CompletedResponse;
         ControllerSound.Instance.ExecuteSound(responseClip);
         AnimationExplain();
-        //StartCoroutine(SynchronizeAnimationWithAudio(responseClip.length, AnimationStand));
     }
 
     public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
@@ -273,5 +273,10 @@ public class Avatar : MonoBehaviour
         // Sincronizar la animación "Explain" con el audio y cambiar a "Stand" cuando termine
         avatarAnimator.SetTrigger(ExplainTrigger);
     }
+            public void AnimationListen()
+    {
+        avatarAnimator.SetTrigger(listenTrigger);
+    }
+
 
 }

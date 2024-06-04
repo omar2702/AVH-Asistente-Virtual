@@ -44,7 +44,6 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
 
         for (int i = 0; i < result.Length; i++)
         {
-            // if(result[i].ToLower().Contains("akira") || result[i].ToLower().Contains("akima") || result[i].ToLower().Contains("aki") || result[i].ToLower().Contains("iki"))
             if(result[i].ToLower().Contains("luna") || result[i].ToLower().Contains("lun"))
             {
                 keywordFound = true;
@@ -52,10 +51,9 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
             
         }
 
-        if (keywordFound)
+        if (keywordFound == true)
         {   
             keywordFound = false;           
-            // StartRecording();
             StopListeningName();
         }
     }
@@ -63,9 +61,9 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     public void OnError(string recognizedError) {}
 
     private void StopListeningName() {
-        //dejar de escuchar la palabra clave "akira"
+        //dejar de escuchar la palabra clave "luna"
         StopListening();
-        ControllerSound.Instance.ExecuteSound(bell);
+        ControllerSound.Instance.ExecuteSound(bell); // Cambiar por audio "Listen"
     }
     private void StartRecording() {
         //se termina el audio "bell" y empieza a grabar el audio del estudiante
@@ -74,8 +72,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     }
 
     private void AvatarResponseFinalized() {
-        plugin.StartListening(); //vuelve a escuchar la palabra clave "akira"
+        plugin.StartListening(); //vuelve a escuchar la palabra clave "luna"
         ControllerSound.SoundCompleted += StartRecording; //se suscribe al evento que indica cuando "bell" terminó
     }
-
 }
