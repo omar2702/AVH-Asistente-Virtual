@@ -30,7 +30,7 @@ public class Hologram : MonoBehaviour
 
     void Scale()
     {
-        transform.localScale = new Vector3(4, 7, 4);
+        transform.localScale = new Vector3(4, 5, 4);
     }
 
     void CameraRotation()
