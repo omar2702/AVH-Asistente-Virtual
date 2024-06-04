@@ -64,7 +64,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
 
     private void StopListeningName() {
         //dejar de escuchar la palabra clave "akira"
-        StopListening();
+        StopListening();//cambio de prueba
         ControllerSound.Instance.ExecuteSound(bell);
     }
     private void StartRecording() {
