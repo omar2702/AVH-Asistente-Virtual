@@ -234,6 +234,7 @@ MonoBehaviour:
   waitSound3: {fileID: 8300000, guid: 9cd5d456ac5fffa46876bcc061eb3600, type: 3}
   waitSound4: {fileID: 8300000, guid: 677c9d2f04e25dc49bd3fa6bdbebb899, type: 3}
   errorSound: {fileID: 8300000, guid: 09b1abb51702a684dacd20d58a2e68ba, type: 3}
+  inactiveSound: {fileID: 8300000, guid: 5ea794d327e013f408d9a44b82474555, type: 3}
 --- !u!1 &317264514
 GameObject:
   m_ObjectHideFlags: 0
