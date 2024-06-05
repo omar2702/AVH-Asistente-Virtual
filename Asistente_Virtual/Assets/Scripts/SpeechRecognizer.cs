@@ -63,8 +63,8 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     public void OnError(string recognizedError) {}
 
     private void StopListeningName() {
-        //dejar de escuchar la palabra clave "akira"
-        StopListening();
+        //dejar de escuchar la palabra clave "luna"
+        StopListening();//cambio de prueba
         ControllerSound.Instance.ExecuteSound(bell);
     }
     private void StartRecording() {
@@ -74,7 +74,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     }
 
     private void AvatarInactivated() {
-        plugin.StartListening(); //vuelve a escuchar la palabra clave "akira"
+        plugin.StartListening(); //vuelve a escuchar la palabra clave "luna"
         ControllerSound.SoundCompleted += StartRecording; //se suscribe al evento que indica cuando "bell" terminó
     }
 

@@ -28,6 +28,7 @@ public class Avatar : MonoBehaviour
     private bool spokeOnce = false;
     public static event System.Action Inactivated; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
+
     private bool active = false;//Sergio 04/06/2024   
 
     // [SerializeField] private AudioClip bell;
@@ -43,7 +44,6 @@ public class Avatar : MonoBehaviour
         AnimationStand();
     }
 
-
     void Update() {
         if(isRecording) { //detectar si no se habla durante 3 segundos para parar de grabar y mandarlo a lambda
             if (clip != null && Microphone.GetPosition(null) > 0 && IsSilent()) {
@@ -51,8 +51,8 @@ public class Avatar : MonoBehaviour
                 if ((Time.time - lastSoundTime > 2.5f) && spokeOnce == true) {
                     GenerateResponse();
                 }
-                else if ((Time.time - lastSoundTime > 5.0f) && spokeOnce == false) {
-                     Inactivate();
+                else if ((Time.time - lastSoundTime > 9.0f) && spokeOnce == false) {
+                    Inactivate();
                 }
             }
             else {
@@ -61,7 +61,7 @@ public class Avatar : MonoBehaviour
         }     
     }
 
-     public bool getActive() {
+    public bool getActive() {
         return this.active;
     }
 
@@ -123,8 +123,23 @@ public class Avatar : MonoBehaviour
         isRecording = false;
         audioBytesUser = EncodeAsWAV(samples, clip.frequency, clip.channels);
         // ControllerSound.Instance.ExecuteSound(bell);
+    }
+    //Sergio 04/06/2024
+    public void GenerateResponse() {
+        StopRecording();
         StartCoroutine(SendRecording());
     }
+    //fin Sergio
+    //Sergio 04/06/2024
+    public void Inactivate() {
+        StopRecording();
+        active = false;
+        responseClip = inactiveSound;
+        ControllerSound.SoundCompleted += CompletelyInactivated;
+        ControllerSound.Instance.ExecuteSound(responseClip);
+        AnimationWait();//cambiar animacion
+    }
+    //fin Sergio
 
     private byte[] EncodeAsWAV(float[] samples, int frequency, int channels) { //obtener los bytes del audio
         using (var memoryStream = new MemoryStream(44 + samples.Length * 2)) {
@@ -203,7 +218,7 @@ public class Avatar : MonoBehaviour
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
             //Sergio 23/05/2024
             responseClip = errorSound;
-            if (!ControllerSound.Instance.IsPlaying()) {
+            if (!ControllerSound.Instance.IsPlaying()) {           
                 PlayResponseClip();
             } else {
                 //Esperar que termine el audio de espera
@@ -230,8 +245,8 @@ public class Avatar : MonoBehaviour
 
             if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError)){
                 //Sergio 24/05/2024
-                responseClip = errorSound;
-                if (!ControllerSound.Instance.IsPlaying()) {  
+                 responseClip = errorSound;
+                if (!ControllerSound.Instance.IsPlaying()) {
                     PlayResponseClip();
                 } else {
                     //Esperar que termine el audio de espera
@@ -260,19 +275,18 @@ public class Avatar : MonoBehaviour
     }
 
     //Sergio 22/05/2024
-   public void PlayResponseClip() {
+    public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
         ControllerSound.SoundCompleted += StartRecording;
         ControllerSound.Instance.ExecuteSound(responseClip);
         AnimationExplain();
         //StartCoroutine(SynchronizeAnimationWithAudio(responseClip.length, AnimationStand));
     }
-
-    public void CompletelyInactivated(){// funcion que se invoca cuando se terminó de reroducir la respuesta
+    public void CompletelyInactivated(){// funcion que se invoca cuando se terminó de repoducir la respuesta
         ControllerSound.SoundCompleted -= CompletelyInactivated; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Inactivated?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
-        AnimationStand();
+        // AnimationStand();
     }
     
 
