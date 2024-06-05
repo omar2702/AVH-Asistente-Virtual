@@ -26,14 +26,17 @@ public class Avatar : MonoBehaviour
     private byte[] audioBytesUser; //bytes del audio del estudiante
     private float lastSoundTime = 0f;
     private bool spokeOnce = false;
-    public static event System.Action Completed; //evento que se dispara cuando se terminó de reproducir la respuesta
+    public static event System.Action Inactivated; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
+    private bool active = false;//Sergio 04/06/2024   
+
     // [SerializeField] private AudioClip bell;
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound3; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound4; //Sergio 23/05/2024
     [SerializeField] private AudioClip errorSound; //Sergio 23/05/2024
+    [SerializeField] private AudioClip inactiveSound; //Sergio 04/06/2024
 
     void Start() {
         avatarAnimator = GetComponent<Animator>();
@@ -46,10 +49,10 @@ public class Avatar : MonoBehaviour
             if (clip != null && Microphone.GetPosition(null) > 0 && IsSilent()) {
                 
                 if ((Time.time - lastSoundTime > 2.5f) && spokeOnce == true) {
-                    StopRecording();
+                    GenerateResponse();
                 }
                 else if ((Time.time - lastSoundTime > 5.0f) && spokeOnce == false) {
-                    StopRecording();
+                     Inactivate();
                 }
             }
             else {
@@ -58,24 +61,54 @@ public class Avatar : MonoBehaviour
         }     
     }
 
+     public bool getActive() {
+        return this.active;
+    }
+
+    public void setActive(bool active) {
+        this.active = active;
+    }
+
     IEnumerator StopRecordingAfterDuration(int duration) {
         // Espera durante el tiempo especificado
         yield return new WaitForSeconds(duration);
 
-        if (isRecording)
+        if (isRecording && this.spokeOnce)
         {
-            StopRecording();
+            GenerateResponse();
         }
     }
 
     public void StartRecording() { //esta función se llama desde SpeechRecognizer
+        //Sergio 04/06/2024
+        if (active)
+            ControllerSound.SoundCompleted -= StartRecording;
+        //fin sergio
         clip = Microphone.Start(null, false, recordingDuration, 44100);
         isRecording = true;
         spokeOnce = false;
+        active = true;//Sergio 04/06/2024
         lastSoundTime = Time.time;
         recordingCoroutine = StartCoroutine(StopRecordingAfterDuration(recordingDuration));
         AnimationStand();
     }
+
+        //Sergio 04/06/2024
+    public void GenerateResponse() {
+        StopRecording();
+        StartCoroutine(SendRecording());
+    }
+    //fin Sergio
+    //Sergio 04/06/2024
+    public void Inactivate() {
+        StopRecording();
+        active = false;
+        responseClip = inactiveSound;
+        ControllerSound.SoundCompleted += CompletelyInactivated;
+        ControllerSound.Instance.ExecuteSound(responseClip);
+        AnimationWait();//cambiar animacion
+    }
+    //fin Sergio
 
     public void StopRecording() {
         if (!isRecording) return;
@@ -169,8 +202,8 @@ public class Avatar : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success) {
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
             //Sergio 23/05/2024
+            responseClip = errorSound;
             if (!ControllerSound.Instance.IsPlaying()) {
-                responseClip = errorSound;
                 PlayResponseClip();
             } else {
                 //Esperar que termine el audio de espera
@@ -197,8 +230,8 @@ public class Avatar : MonoBehaviour
 
             if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError)){
                 //Sergio 24/05/2024
-                if (!ControllerSound.Instance.IsPlaying()) {
-                    responseClip = errorSound;
+                responseClip = errorSound;
+                if (!ControllerSound.Instance.IsPlaying()) {  
                     PlayResponseClip();
                 } else {
                     //Esperar que termine el audio de espera
@@ -229,16 +262,16 @@ public class Avatar : MonoBehaviour
     //Sergio 22/05/2024
    public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
-        ControllerSound.SoundCompleted += CompletedResponse;
+        ControllerSound.SoundCompleted += StartRecording;
         ControllerSound.Instance.ExecuteSound(responseClip);
         AnimationExplain();
         //StartCoroutine(SynchronizeAnimationWithAudio(responseClip.length, AnimationStand));
     }
 
-    public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
-        ControllerSound.SoundCompleted -= CompletedResponse; //desuscribirse al evento del audio de la respuesta
+    public void CompletelyInactivated(){// funcion que se invoca cuando se terminó de reroducir la respuesta
+        ControllerSound.SoundCompleted -= CompletelyInactivated; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
-        Completed?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
+        Inactivated?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
         AnimationStand();
     }
     
