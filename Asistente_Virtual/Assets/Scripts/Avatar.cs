@@ -16,6 +16,7 @@ public class Avatar : MonoBehaviour
     private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
     private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
     private static readonly int StandTrigger = Animator.StringToHash("AHStand");
+    private static readonly int ListenTrigger = Animator.StringToHash("AHListen");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
@@ -274,4 +275,8 @@ public class Avatar : MonoBehaviour
         avatarAnimator.SetTrigger(ExplainTrigger);
     }
 
+    public void AnimationListen()
+    {
+        avatarAnimator.SetTrigger(ListenTrigger);
+    }
 }
