@@ -267,7 +267,7 @@ public class Avatar : MonoBehaviour
         ControllerSound.SoundCompleted -= CompletelyInactivated; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Inactivated?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
-        // AnimationStand();
+        AnimationStand();
     }
     
 
@@ -288,19 +288,27 @@ public class Avatar : MonoBehaviour
     }
         //Animaciones
     public void AnimationWait() // Animacion Esperar
-    {
-            avatarAnimator.SetTrigger(WaitTrigger);
+    {       
+         avatarAnimator.SetTrigger(WaitTrigger);
+         StartCoroutine(ReturnToStandAfterAnimation("Wait"));//Sergio 05/06/2024
     }
 
     public void AnimationStand()
     {
-            avatarAnimator.SetTrigger(StandTrigger);
+        avatarAnimator.SetTrigger(StandTrigger);
     }
 
     public void AnimationExplain()
     {
         // Sincronizar la animación "Explain" con el audio y cambiar a "Stand" cuando termine
         avatarAnimator.SetTrigger(ExplainTrigger);
+        // StartCoroutine(ReturnToStandAfterAnimation("Explain"));
     }
+    //Sergio 05/06/2024
+    private IEnumerator ReturnToStandAfterAnimation(string animationName) {
+        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
+        AnimationStand();
+    }
+    //fin sergio
 
 }
