@@ -31,7 +31,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
         plugin.StartListening();
         plugin.SetContinuousListening(true);
         plugin.SetLanguageForNextRecognition("es-ES");
-        plugin.SetMaxResultsForNextRecognition(10);
+        plugin.SetMaxResultsForNextRecognition(1);
     }
 
     private void StopListening() {

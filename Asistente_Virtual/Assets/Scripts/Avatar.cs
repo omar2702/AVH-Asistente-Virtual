@@ -29,9 +29,8 @@ public class Avatar : MonoBehaviour
     private bool spokeOnce = false;
     public static event System.Action Inactivated; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
-
-    private bool active = false;//Sergio 04/06/2024   
-
+    private bool active = false;//Sergio 04/06/2024
+    private bool error = false;//Sergio 05/06/2024
     // [SerializeField] private AudioClip bell;
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
@@ -103,7 +102,6 @@ public class Avatar : MonoBehaviour
     //Sergio 04/06/2024
     public void Inactivate() {
         StopRecording();
-        active = false;
         responseClip = inactiveSound;
         ControllerSound.SoundCompleted += CompletelyInactivated;
         ControllerSound.Instance.ExecuteSound(responseClip);
@@ -202,6 +200,7 @@ public class Avatar : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success) {
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
             //Sergio 23/05/2024
+            error = true;//Sergio 05/06/2024
             responseClip = errorSound;
             if (!ControllerSound.Instance.IsPlaying()) {           
                 PlayResponseClip();
@@ -230,7 +229,8 @@ public class Avatar : MonoBehaviour
 
             if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError)){
                 //Sergio 24/05/2024
-                 responseClip = errorSound;
+                error = true;//Sergio 05/06/2024
+                responseClip = errorSound;
                 if (!ControllerSound.Instance.IsPlaying()) {
                     PlayResponseClip();
                 } else {
@@ -241,6 +241,7 @@ public class Avatar : MonoBehaviour
             }    
             else {
                 //Sergio 22/05/2024
+                error = false;//Sergio 05/06/2024
                 responseClip = DownloadHandlerAudioClip.GetContent(requestAudio);
                 if (!ControllerSound.Instance.IsPlaying()) { //se terminó de reproducir el audio de espera
                     PlayResponseClip();
@@ -262,16 +263,24 @@ public class Avatar : MonoBehaviour
     //Sergio 22/05/2024
     public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
-        ControllerSound.SoundCompleted += StartRecording;
+        //Sergio 05/06/2024
+        if(error) {
+            ControllerSound.SoundCompleted += CompletelyInactivated;
+        }
+        else {
+            ControllerSound.SoundCompleted += StartRecording;
+        }
+        //fin Sergio
         ControllerSound.Instance.ExecuteSound(responseClip);
         AnimationExplain();
-        //StartCoroutine(SynchronizeAnimationWithAudio(responseClip.length, AnimationStand));
     }
-    public void CompletelyInactivated(){// funcion que se invoca cuando se terminó de repoducir la respuesta
+
+    public void CompletelyInactivated(){
+        active = false;//Sergio 05/06/2024
         ControllerSound.SoundCompleted -= CompletelyInactivated; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
         Inactivated?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
-        // AnimationStand();
+        AnimationStand();
     }
     
 
@@ -292,21 +301,28 @@ public class Avatar : MonoBehaviour
     }
         //Animaciones
     public void AnimationWait() // Animacion Esperar
-    {
-            avatarAnimator.SetTrigger(WaitTrigger);
-            StartCoroutine(ReturnToStandAfterWait("Wait"));
+    {       
+         avatarAnimator.SetTrigger(WaitTrigger);
+         StartCoroutine(ReturnToStandAfterAnimation("Wait"));//Sergio 05/06/2024
     }
 
     public void AnimationStand()
     {
-            avatarAnimator.SetTrigger(StandTrigger);
+        avatarAnimator.SetTrigger(StandTrigger);
     }
 
     public void AnimationExplain()
     {
         // Sincronizar la animación "Explain" con el audio y cambiar a "Stand" cuando termine
         avatarAnimator.SetTrigger(ExplainTrigger);
+        // StartCoroutine(ReturnToStandAfterAnimation("Explain"));
     }
+    //Sergio 05/06/2024
+    private IEnumerator ReturnToStandAfterAnimation(string animationName) {
+        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
+        AnimationStand();
+    }
+    //fin sergio
 
     public void AnimationListen()
     {
