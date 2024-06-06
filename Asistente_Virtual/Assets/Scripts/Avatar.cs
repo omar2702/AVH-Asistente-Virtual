@@ -332,17 +332,6 @@ public class Avatar : MonoBehaviour
     public void AnimationInactive()
     {
         avatarAnimator.SetTrigger(InactiveTrigger);
-        StartCoroutine(ReturnToStandAfterInactive("Inactive"));
-    }
-
-    private IEnumerator ReturnToStandAfterWait(string animationTrigger)
-    {
-        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationTrigger));
-        AnimationStand();
-    }
-        private IEnumerator ReturnToStandAfterInactive(string animationTrigger)
-    {
-        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationTrigger));
-        AnimationStand();
+        StartCoroutine(ReturnToStandAfterAnimation("Inactive"));
     }
 }
