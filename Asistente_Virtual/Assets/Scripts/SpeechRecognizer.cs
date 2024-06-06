@@ -20,7 +20,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
         plugin = SpeechRecognizerPlugin.GetPlatformPluginVersion(this.gameObject.name);
         avatar = GameObject.FindGameObjectWithTag("Avatar").GetComponent<Avatar>();
         ControllerSound.SoundCompleted += StartRecording; //suscribirse al evento que indica cuando el sonido "bell" terminó
-        Avatar.Completed += AvatarResponseFinalized; //suscribirse al evento que indica cuando se terminó de reproducir la respuesta
+        Avatar.Inactivated += AvatarInactivated; //suscribirse al evento que indica cuando se terminó de reproducir la respuesta
         Invoke("StartListening", 1f);
     }
 
@@ -31,7 +31,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
         plugin.StartListening();
         plugin.SetContinuousListening(true);
         plugin.SetLanguageForNextRecognition("es-ES");
-        plugin.SetMaxResultsForNextRecognition(10);
+        plugin.SetMaxResultsForNextRecognition(1);
     }
 
     private void StopListening() {
@@ -63,8 +63,8 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     public void OnError(string recognizedError) {}
 
     private void StopListeningName() {
-        //dejar de escuchar la palabra clave "akira"
-        StopListening();
+        //dejar de escuchar la palabra clave "luna"
+        StopListening();//cambio de prueba
         ControllerSound.Instance.ExecuteSound(bell);
     }
     private void StartRecording() {
@@ -73,8 +73,8 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
         avatar.StartRecording(); //empieza a grabar el audio del estudiante y enviarlo a lambda
     }
 
-    private void AvatarResponseFinalized() {
-        plugin.StartListening(); //vuelve a escuchar la palabra clave "akira"
+    private void AvatarInactivated() {
+        plugin.StartListening(); //vuelve a escuchar la palabra clave "luna"
         ControllerSound.SoundCompleted += StartRecording; //se suscribe al evento que indica cuando "bell" terminó
     }
 
