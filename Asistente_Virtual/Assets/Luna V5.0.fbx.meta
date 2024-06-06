@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 246a2d2bd1706b64c87b5ec24f458a63
+guid: 7afbff68573fe8b4e8dfc3fda997b94d
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -37,7 +37,7 @@ ModelImporter:
       takeName: metarig|Explain
       internalID: 4287249858064140973
       firstFrame: 0
-      lastFrame: 199
+      lastFrame: 599
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -62,11 +62,40 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Listen
-      takeName: metarig|Listen
-      internalID: 5810187895145003697
+      name: Greetings
+      takeName: metarig|Grettings
+      internalID: -6665322816066832219
       firstFrame: 0
-      lastFrame: 49
+      lastFrame: 99
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: Inactive
+      takeName: metarig|Inactive
+      internalID: -1068832700126988960
+      firstFrame: 0
+      lastFrame: 99
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -95,7 +124,7 @@ ModelImporter:
       takeName: metarig|Stand
       internalID: -1458074983525215065
       firstFrame: 0
-      lastFrame: 198
+      lastFrame: 199
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

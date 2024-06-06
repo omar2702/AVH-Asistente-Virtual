@@ -16,7 +16,8 @@ public class Avatar : MonoBehaviour
     private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
     private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
     private static readonly int StandTrigger = Animator.StringToHash("AHStand");
-    private static readonly int ListenTrigger = Animator.StringToHash("AHListen");
+    private static readonly int GreetingsTrigger = Animator.StringToHash("AHGreetings");
+    private static readonly int InactiveTrigger = Animator.StringToHash("AHInactive");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
@@ -106,7 +107,7 @@ public class Avatar : MonoBehaviour
         responseClip = inactiveSound;
         ControllerSound.SoundCompleted += CompletelyInactivated;
         ControllerSound.Instance.ExecuteSound(responseClip);
-        AnimationWait();//cambiar animacion
+        AnimationInactive();
     }
     //fin Sergio
 
@@ -124,22 +125,6 @@ public class Avatar : MonoBehaviour
         audioBytesUser = EncodeAsWAV(samples, clip.frequency, clip.channels);
         // ControllerSound.Instance.ExecuteSound(bell);
     }
-    //Sergio 04/06/2024
-    public void GenerateResponse() {
-        StopRecording();
-        StartCoroutine(SendRecording());
-    }
-    //fin Sergio
-    //Sergio 04/06/2024
-    public void Inactivate() {
-        StopRecording();
-        active = false;
-        responseClip = inactiveSound;
-        ControllerSound.SoundCompleted += CompletelyInactivated;
-        ControllerSound.Instance.ExecuteSound(responseClip);
-        AnimationWait();//cambiar animacion
-    }
-    //fin Sergio
 
     private byte[] EncodeAsWAV(float[] samples, int frequency, int channels) { //obtener los bytes del audio
         using (var memoryStream = new MemoryStream(44 + samples.Length * 2)) {
@@ -309,6 +294,7 @@ public class Avatar : MonoBehaviour
     public void AnimationWait() // Animacion Esperar
     {
             avatarAnimator.SetTrigger(WaitTrigger);
+            StartCoroutine(ReturnToStandAfterWait("Wait"));
     }
 
     public void AnimationStand()
@@ -324,6 +310,23 @@ public class Avatar : MonoBehaviour
 
     public void AnimationListen()
     {
-        avatarAnimator.SetTrigger(ListenTrigger);
+        avatarAnimator.SetTrigger(GreetingsTrigger);
+    }
+
+    public void AnimationInactive()
+    {
+        avatarAnimator.SetTrigger(InactiveTrigger);
+        StartCoroutine(ReturnToStandAfterInactive("Inactive"));
+    }
+
+    private IEnumerator ReturnToStandAfterWait(string animationTrigger)
+    {
+        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationTrigger));
+        AnimationStand();
+    }
+        private IEnumerator ReturnToStandAfterInactive(string animationTrigger)
+    {
+        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationTrigger));
+        AnimationStand();
     }
 }
