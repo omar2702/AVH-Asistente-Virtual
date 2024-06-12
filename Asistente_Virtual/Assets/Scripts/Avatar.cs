@@ -31,6 +31,7 @@ public class Avatar : MonoBehaviour
     private List<DataGPT> background = new List<DataGPT>(); //historial
     private bool active = false;//Sergio 04/06/2024
     private bool error = false;//Sergio 05/06/2024
+    private string action = "";//Sergio 08/06/2024
     // [SerializeField] private AudioClip bell;
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
@@ -216,6 +217,7 @@ public class Avatar : MonoBehaviour
             // Analizar el JSON
             ResponseApi response = JsonUtility.FromJson<ResponseApi>(jsonResponse);
             string audioBase64 = response.response_gpt_voice_base64;
+            action = response.action;//Sergio 08/06/2024
 
             background.Clear();
             background.AddRange(response.background_updated);
@@ -264,7 +266,7 @@ public class Avatar : MonoBehaviour
     public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
         //Sergio 05/06/2024
-        if(error) {
+        if(error || action.ToLower() == "descansar") {
             ControllerSound.SoundCompleted += CompletelyInactivated;
         }
         else {
@@ -293,6 +295,7 @@ public class Avatar : MonoBehaviour
     public class ResponseApi {
         public string response_gpt_voice_base64;
         public List<DataGPT> background_updated;
+        public string action; //Sergio 08/06/2024
     }
     [System.Serializable]
     public class DataGPT {
