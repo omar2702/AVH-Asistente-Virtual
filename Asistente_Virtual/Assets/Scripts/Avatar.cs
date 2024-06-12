@@ -16,6 +16,8 @@ public class Avatar : MonoBehaviour
     private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
     private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
     private static readonly int StandTrigger = Animator.StringToHash("AHStand");
+    private static readonly int GreetingsTrigger = Animator.StringToHash("AHGreetings");
+    private static readonly int InactiveTrigger = Animator.StringToHash("AHInactive");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
@@ -29,6 +31,7 @@ public class Avatar : MonoBehaviour
     private List<DataGPT> background = new List<DataGPT>(); //historial
     private bool active = false;//Sergio 04/06/2024
     private bool error = false;//Sergio 05/06/2024
+    private string action = "";//Sergio 08/06/2024
     // [SerializeField] private AudioClip bell;
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
@@ -91,6 +94,22 @@ public class Avatar : MonoBehaviour
         AnimationStand();
     }
 
+        //Sergio 04/06/2024
+    public void GenerateResponse() {
+        StopRecording();
+        StartCoroutine(SendRecording());
+    }
+    //fin Sergio
+    //Sergio 04/06/2024
+    public void Inactivate() {
+        StopRecording();
+        responseClip = inactiveSound;
+        ControllerSound.SoundCompleted += CompletelyInactivated;
+        ControllerSound.Instance.ExecuteSound(responseClip);
+        AnimationInactive();
+    }
+    //fin Sergio
+
     public void StopRecording() {
         if (!isRecording) return;
         var position = Microphone.GetPosition(null);
@@ -105,21 +124,6 @@ public class Avatar : MonoBehaviour
         audioBytesUser = EncodeAsWAV(samples, clip.frequency, clip.channels);
         // ControllerSound.Instance.ExecuteSound(bell);
     }
-    //Sergio 04/06/2024
-    public void GenerateResponse() {
-        StopRecording();
-        StartCoroutine(SendRecording());
-    }
-    //fin Sergio
-    //Sergio 04/06/2024
-    public void Inactivate() {
-        StopRecording();
-        responseClip = inactiveSound;
-        ControllerSound.SoundCompleted += CompletelyInactivated;
-        ControllerSound.Instance.ExecuteSound(responseClip);
-        AnimationWait();//cambiar animacion
-    }
-    //fin Sergio
 
     private byte[] EncodeAsWAV(float[] samples, int frequency, int channels) { //obtener los bytes del audio
         using (var memoryStream = new MemoryStream(44 + samples.Length * 2)) {
@@ -213,6 +217,7 @@ public class Avatar : MonoBehaviour
             // Analizar el JSON
             ResponseApi response = JsonUtility.FromJson<ResponseApi>(jsonResponse);
             string audioBase64 = response.response_gpt_voice_base64;
+            action = response.action;//Sergio 08/06/2024
 
             background.Clear();
             background.AddRange(response.background_updated);
@@ -261,7 +266,7 @@ public class Avatar : MonoBehaviour
     public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
         //Sergio 05/06/2024
-        if(error) {
+        if(error || action.ToLower() == "descansar") {
             ControllerSound.SoundCompleted += CompletelyInactivated;
         }
         else {
@@ -290,6 +295,7 @@ public class Avatar : MonoBehaviour
     public class ResponseApi {
         public string response_gpt_voice_base64;
         public List<DataGPT> background_updated;
+        public string action; //Sergio 08/06/2024
     }
     [System.Serializable]
     public class DataGPT {
@@ -321,4 +327,14 @@ public class Avatar : MonoBehaviour
     }
     //fin sergio
 
+    public void AnimationListen()
+    {
+        avatarAnimator.SetTrigger(GreetingsTrigger);
+    }
+
+    public void AnimationInactive()
+    {
+        avatarAnimator.SetTrigger(InactiveTrigger);
+        StartCoroutine(ReturnToStandAfterAnimation("Inactive"));
+    }
 }

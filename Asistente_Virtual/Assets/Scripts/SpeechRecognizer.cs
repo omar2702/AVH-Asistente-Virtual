@@ -66,6 +66,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
         //dejar de escuchar la palabra clave "luna"
         StopListening();//cambio de prueba
         ControllerSound.Instance.ExecuteSound(bell);
+        avatar.AnimationListen();
     }
     private void StartRecording() {
         //se termina el audio "bell" y empieza a grabar el audio del estudiante
