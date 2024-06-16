@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589246, b: 0.2978263, a: 1}
+  m_IndirectSpecularColor: {r: 0.17276844, g: 0.21589245, b: 0.2978263, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 865aaaecc4828934191690baf7e28011, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bell: {fileID: 8300000, guid: f00376a6027281f499ffecce2da07b60, type: 3}
+  bell: {fileID: 8300000, guid: 8432735696eedf945b2ff2fe73e5ed78, type: 3}
   avatar: {fileID: 0}
 --- !u!4 &628804032
 Transform:
@@ -451,6 +451,119 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
+--- !u!1001 &876107561
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.45
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_Name
+      value: Luna V5.0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      propertyPath: m_TagString
+      value: Avatar
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 876107564}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 876107563}
+  m_SourcePrefab: {fileID: 100100000, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+--- !u!1 &876107562 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7afbff68573fe8b4e8dfc3fda997b94d, type: 3}
+  m_PrefabInstance: {fileID: 876107561}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &876107563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 876107562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4d2e0dd3ddf43409f5cde98f35159d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  avatarAnimator: {fileID: 876107564}
+  waitSound1: {fileID: 8300000, guid: b93258d7715bc5f4eb0b3f2fb3debf67, type: 3}
+  waitSound2: {fileID: 8300000, guid: 2571cb7ae517c7649b72f6ea7d10531b, type: 3}
+  waitSound3: {fileID: 8300000, guid: 9cd5d456ac5fffa46876bcc061eb3600, type: 3}
+  waitSound4: {fileID: 8300000, guid: 677c9d2f04e25dc49bd3fa6bdbebb899, type: 3}
+  errorSound: {fileID: 8300000, guid: 09b1abb51702a684dacd20d58a2e68ba, type: 3}
+  inactiveSound: {fileID: 8300000, guid: 5ea794d327e013f408d9a44b82474555, type: 3}
+--- !u!95 &876107564
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 876107562}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1ab7a92f7ebda8249aa2eb929dc84e22, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+
 --- !u!1001 &1642282147
 PrefabInstance:
   m_ObjectHideFlags: 0
