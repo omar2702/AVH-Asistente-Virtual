@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 7afbff68573fe8b4e8dfc3fda997b94d
+guid: a598a2ba3207f064286db18de555bf2d
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -62,7 +62,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Greetings
+      name: Grettings
       takeName: metarig|Grettings
       internalID: -6665322816066832219
       firstFrame: 0
@@ -95,7 +95,7 @@ ModelImporter:
       takeName: metarig|Inactive
       internalID: -1068832700126988960
       firstFrame: 0
-      lastFrame: 99
+      lastFrame: 69
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -124,7 +124,7 @@ ModelImporter:
       takeName: metarig|Stand
       internalID: -1458074983525215065
       firstFrame: 0
-      lastFrame: 199
+      lastFrame: 520
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
