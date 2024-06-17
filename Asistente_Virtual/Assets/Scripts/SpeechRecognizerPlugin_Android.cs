@@ -7,6 +7,7 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
     private string javaClassPackageName = "com.example.eric.unityspeechrecognizerplugin.SpeechRecognizerFragment";
     private AndroidJavaClass javaClass = null;
     private AndroidJavaObject instance = null;
+    private AndroidJavaObject audioManager = null;
 
     protected override void SetUp()
     {
@@ -14,6 +15,29 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
         javaClass = new AndroidJavaClass(javaClassPackageName);
         javaClass.CallStatic("SetUp", gameObjectName);
         instance = javaClass.GetStatic<AndroidJavaObject>("instance");
+
+        // Obtener el contexto de la actividad actual de Unity
+        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+
+        // Obtener el servicio Audio Manager
+        audioManager = activity.Call<AndroidJavaObject>("getSystemService", "audio");
+
+                // Silenciar el volumen de notificaciones
+        if (audioManager != null)
+        {
+            audioManager.Call("setStreamVolume", 5, 0, 0);  // STREAM_NOTIFICATION = 5
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        // Restaurar el volumen de notificaciones al salir de la aplicación
+        if (audioManager != null)
+        {
+            int maxVolume = audioManager.Call<int>("getStreamMaxVolume", 5);  // STREAM_NOTIFICATION = 5
+            audioManager.Call("setStreamVolume", 5, maxVolume, 0);
+        }
     }
 
     public override void StartListening()
