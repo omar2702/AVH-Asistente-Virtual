@@ -8,6 +8,8 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
     private AndroidJavaClass javaClass = null;
     private AndroidJavaObject instance = null;
     private AndroidJavaObject audioManager = null;
+    private int originalNotificationVolume;
+
 
     protected override void SetUp()
     {
@@ -23,9 +25,17 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
         // Obtener el servicio Audio Manager
         audioManager = activity.Call<AndroidJavaObject>("getSystemService", "audio");
 
-                // Silenciar el volumen de notificaciones
         if (audioManager != null)
         {
+            // Ajustar el volumen de multimedia al 80%
+            int maxMediaVolume = audioManager.Call<int>("getStreamMaxVolume", 3);  // STREAM_MUSIC = 3
+            int newMediaVolume = (int)(maxMediaVolume * 0.8f);
+            audioManager.Call("setStreamVolume", 3, newMediaVolume, 0);
+
+            // Guardar el volumen original de notificaciones
+            originalNotificationVolume = audioManager.Call<int>("getStreamVolume", 5);  // STREAM_NOTIFICATION = 5
+
+            // Silenciar el volumen de notificaciones
             audioManager.Call("setStreamVolume", 5, 0, 0);  // STREAM_NOTIFICATION = 5
         }
     }
@@ -35,8 +45,7 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
         // Restaurar el volumen de notificaciones al salir de la aplicación
         if (audioManager != null)
         {
-            int maxVolume = audioManager.Call<int>("getStreamMaxVolume", 5);  // STREAM_NOTIFICATION = 5
-            audioManager.Call("setStreamVolume", 5, maxVolume, 0);
+            audioManager.Call("setStreamVolume", 5, originalNotificationVolume, 0);  // STREAM_NOTIFICATION = 5
         }
     }
 
