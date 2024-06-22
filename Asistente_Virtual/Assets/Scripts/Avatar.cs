@@ -42,6 +42,19 @@ public class Avatar : MonoBehaviour
 
     void Start() {
         avatarAnimator = GetComponent<Animator>();
+
+        // Bloquea la orientación a horizontal
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+
+        // Asegúrate de que la orientación se bloquea y no pueda cambiar
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+
+        // Forzar pantalla completa
+        Screen.fullScreen = true;
+
         AnimationStand();
     }
 

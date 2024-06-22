@@ -7,6 +7,9 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
     private string javaClassPackageName = "com.example.eric.unityspeechrecognizerplugin.SpeechRecognizerFragment";
     private AndroidJavaClass javaClass = null;
     private AndroidJavaObject instance = null;
+    private AndroidJavaObject audioManager = null;
+    private int originalNotificationVolume;
+
 
     protected override void SetUp()
     {
@@ -14,6 +17,36 @@ public class SpeechRecognizerPlugin_Android : SpeechRecognizerPlugin
         javaClass = new AndroidJavaClass(javaClassPackageName);
         javaClass.CallStatic("SetUp", gameObjectName);
         instance = javaClass.GetStatic<AndroidJavaObject>("instance");
+
+        // Obtener el contexto de la actividad actual de Unity
+        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+
+        // Obtener el servicio Audio Manager
+        audioManager = activity.Call<AndroidJavaObject>("getSystemService", "audio");
+
+        if (audioManager != null)
+        {
+            // Ajustar el volumen de multimedia al 80%
+            int maxMediaVolume = audioManager.Call<int>("getStreamMaxVolume", 3);  // STREAM_MUSIC = 3
+            int newMediaVolume = (int)(maxMediaVolume * 0.8f);
+            audioManager.Call("setStreamVolume", 3, newMediaVolume, 0);
+
+            // Guardar el volumen original de notificaciones
+            originalNotificationVolume = audioManager.Call<int>("getStreamVolume", 5);  // STREAM_NOTIFICATION = 5
+
+            // Silenciar el volumen de notificaciones
+            audioManager.Call("setStreamVolume", 5, 0, 0);  // STREAM_NOTIFICATION = 5
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        // Restaurar el volumen de notificaciones al salir de la aplicación
+        if (audioManager != null)
+        {
+            audioManager.Call("setStreamVolume", 5, originalNotificationVolume, 0);  // STREAM_NOTIFICATION = 5
+        }
     }
 
     public override void StartListening()
