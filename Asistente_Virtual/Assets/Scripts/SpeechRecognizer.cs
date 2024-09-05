@@ -14,6 +14,7 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     private AudioClip clip;
     public Avatar avatar;
     private bool keywordFound = false;
+    private bool close = false;
     private SpeechRecognizerPlugin plugin = null;
    
     private void Start() {
@@ -49,6 +50,10 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
             {
                 keywordFound = true;
             }
+            if(result[i].ToLower().Contains("cerrar"))
+            {
+                close = true;
+            }
             
         }
 
@@ -57,6 +62,18 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
             keywordFound = false;           
             // StartRecording();
             StopListeningName();
+        }
+
+        if (close)
+        {
+            // Cierra la aplicación completamente en dispositivos Android
+        #if UNITY_ANDROID
+            AndroidJavaObject activity = new AndroidJavaObject("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject context = activity.GetStatic<AndroidJavaObject>("currentActivity");
+            context.Call("finishAndRemoveTask"); // Finaliza la actividad y la remueve de las tareas recientes
+        #else
+            Application.Quit(); // Para otras plataformas, utiliza Application.Quit()
+        #endif
         }
     }
 
