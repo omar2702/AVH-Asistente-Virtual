@@ -16,8 +16,41 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
     private bool keywordFound = false;
     private bool close = false;
     private SpeechRecognizerPlugin plugin = null;
+
+    private AndroidJavaObject audioManager;
+    private int originalMediaVolume;
+    private int originalNotificationVolume;
    
     private void Start() {
+        #if UNITY_ANDROID
+    try
+    {
+        // Obtener el contexto de la aplicación y el AudioManager
+        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+        
+        // Usa "AUDIO_SERVICE" en lugar de "audio"
+        audioManager = activity.Call<AndroidJavaObject>("getSystemService", "audio");
+        
+        if (audioManager != null)
+        {
+            // Guardar los volúmenes actuales de llamada, multimedia y notificaciones
+            originalMediaVolume = audioManager.Call<int>("getStreamVolume", 3); // STREAM_MUSIC
+            originalNotificationVolume = audioManager.Call<int>("getStreamVolume", 5); // STREAM_NOTIFICATION
+
+            Debug.Log("Volumen de multimedia: " + originalMediaVolume);
+            Debug.Log("Volumen de notificación: " + originalNotificationVolume);
+        }
+        else
+        {
+            Debug.LogError("Error: AudioManager no se pudo obtener.");
+        }
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError("Error en la obtención del AudioManager: " + e.Message);
+    }
+    #endif
         plugin = SpeechRecognizerPlugin.GetPlatformPluginVersion(this.gameObject.name);
         avatar = GameObject.FindGameObjectWithTag("Avatar").GetComponent<Avatar>();
         ControllerSound.SoundCompleted += StartRecording; //suscribirse al evento que indica cuando el sonido "bell" terminó
@@ -66,15 +99,24 @@ public class SpeechRecognizer : MonoBehaviour, ISpeechRecognizerPlugin
 
         if (close)
         {
-            // Cierra la aplicación completamente en dispositivos Android
-        #if UNITY_ANDROID
-            AndroidJavaObject activity = new AndroidJavaObject("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject context = activity.GetStatic<AndroidJavaObject>("currentActivity");
-            context.Call("finishAndRemoveTask"); // Finaliza la actividad y la remueve de las tareas recientes
-        #else
-            Application.Quit(); // Para otras plataformas, utiliza Application.Quit()
-        #endif
+            RestoreVolumesAndCloseApp();
         }
+    }
+
+    public void RestoreVolumesAndCloseApp()
+    {
+        #if UNITY_ANDROID
+            // Restaurar los volúmenes originales
+            audioManager.Call("setStreamVolume", 3, originalMediaVolume, 0); // STREAM_MUSIC
+            audioManager.Call("setStreamVolume", 5, originalNotificationVolume, 0); // STREAM_NOTIFICATION
+
+            // Cerrar la aplicación completamente
+            AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            activity.Call("finishAndRemoveTask"); // Finalizar la actividad y eliminarla de tareas recientes
+        #else
+            Application.Quit();
+        #endif
     }
 
     public void OnError(string recognizedError) {}
