@@ -7,48 +7,66 @@ using TMPro;
 using System.Text;
 using System;
 using UnityEngine.Events;
+using UnityEngine.AI;
 
 public class Avatar : MonoBehaviour
 {
-    public Animation avatarAnimation;
-    public string animationName = "Explicar";
-    private AnimationState animationState; //Sergio 22/05/2024
+    public Animator avatarAnimator;
+
+    private static readonly int WaitTrigger = Animator.StringToHash("AHWait");
+    private static readonly int ExplainTrigger = Animator.StringToHash("AHExplain");
+    private static readonly int StandTrigger = Animator.StringToHash("AHStand");
+    private static readonly int GreetingsTrigger = Animator.StringToHash("AHGreetings");
+    private static readonly int InactiveTrigger = Animator.StringToHash("AHInactive");
 
     private AudioClip clip; //audio o grabación del estudiante
     private AudioClip responseClip; //Sergio 22/05/2024 audio respuesta de gpt
     private bool isRecording = false;
-    private int recordingDuration = 15;
+    private int recordingDuration = 18;
     private Coroutine recordingCoroutine;
     private byte[] audioBytesUser; //bytes del audio del estudiante
     private float lastSoundTime = 0f;
     private bool spokeOnce = false;
-    public static event System.Action Completed; //evento que se dispara cuando se terminó de reproducir la respuesta
+    public static event System.Action Inactivated; //evento que se dispara cuando se terminó de reproducir la respuesta
     private List<DataGPT> background = new List<DataGPT>(); //historial
+    private bool active = false;//Sergio 04/06/2024
+    private bool error = false;//Sergio 05/06/2024
+    private string action = "";//Sergio 08/06/2024
     // [SerializeField] private AudioClip bell;
     [SerializeField] private AudioClip waitSound1; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound2; //Sergio 22/05/2024
     [SerializeField] private AudioClip waitSound3; //Sergio 22/05/2024
+    [SerializeField] private AudioClip waitSound4; //Sergio 23/05/2024
+    [SerializeField] private AudioClip errorSound; //Sergio 23/05/2024
+    [SerializeField] private AudioClip inactiveSound; //Sergio 04/06/2024
 
     void Start() {
-        // Comprueba que el componente Animator esté asignado
-        if (avatarAnimation == null)
-        {
-            avatarAnimation = GetComponent<Animation>();
-        }
+        avatarAnimator = GetComponent<Animator>();
 
-        // Llama al método para reproducir el audio con la animación
+        // Bloquea la orientación a horizontal
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+
+        // Asegúrate de que la orientación se bloquea y no pueda cambiar
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+
+        // Forzar pantalla completa
+        Screen.fullScreen = true;
+
+        AnimationStand();
     }
-
 
     void Update() {
         if(isRecording) { //detectar si no se habla durante 3 segundos para parar de grabar y mandarlo a lambda
             if (clip != null && Microphone.GetPosition(null) > 0 && IsSilent()) {
                 
-                if ((Time.time - lastSoundTime > 2.0f) && spokeOnce == true) {
-                    StopRecording();
+                if ((Time.time - lastSoundTime > 2.5f) && spokeOnce == true) {
+                    GenerateResponse();
                 }
-                else if ((Time.time - lastSoundTime > 5.0f) && spokeOnce == false) {
-                    StopRecording();
+                else if ((Time.time - lastSoundTime > 9.0f) && spokeOnce == false) {
+                    Inactivate();
                 }
             }
             else {
@@ -57,23 +75,53 @@ public class Avatar : MonoBehaviour
         }     
     }
 
+    public bool getActive() {
+        return this.active;
+    }
+
+    public void setActive(bool active) {
+        this.active = active;
+    }
+
     IEnumerator StopRecordingAfterDuration(int duration) {
         // Espera durante el tiempo especificado
         yield return new WaitForSeconds(duration);
 
-        if (isRecording)
+        if (isRecording && this.spokeOnce)
         {
-            StopRecording();
+            GenerateResponse();
         }
     }
 
     public void StartRecording() { //esta función se llama desde SpeechRecognizer
+        //Sergio 04/06/2024
+        if (active)
+            ControllerSound.SoundCompleted -= StartRecording;
+        //fin sergio
         clip = Microphone.Start(null, false, recordingDuration, 44100);
         isRecording = true;
         spokeOnce = false;
+        active = true;//Sergio 04/06/2024
         lastSoundTime = Time.time;
         recordingCoroutine = StartCoroutine(StopRecordingAfterDuration(recordingDuration));
+        AnimationStand();
     }
+
+        //Sergio 04/06/2024
+    public void GenerateResponse() {
+        StopRecording();
+        StartCoroutine(SendRecording());
+    }
+    //fin Sergio
+    //Sergio 04/06/2024
+    public void Inactivate() {
+        StopRecording();
+        responseClip = inactiveSound;
+        ControllerSound.SoundCompleted += CompletelyInactivated;
+        ControllerSound.Instance.ExecuteSound(responseClip);
+        AnimationInactive();
+    }
+    //fin Sergio
 
     public void StopRecording() {
         if (!isRecording) return;
@@ -88,7 +136,6 @@ public class Avatar : MonoBehaviour
         isRecording = false;
         audioBytesUser = EncodeAsWAV(samples, clip.frequency, clip.channels);
         // ControllerSound.Instance.ExecuteSound(bell);
-        StartCoroutine(SendRecording());
     }
 
     private byte[] EncodeAsWAV(float[] samples, int frequency, int channels) { //obtener los bytes del audio
@@ -123,7 +170,7 @@ public class Avatar : MonoBehaviour
         if (microphonePosition < 0) return false;
         clip.GetData(samples, microphonePosition);
         float averageLevel = GetAverageVolume(samples);
-        float threshold = 0.04f; 
+        float threshold = 0.03f; 
         if (averageLevel < threshold) {
             return true;
         }
@@ -149,9 +196,12 @@ public class Avatar : MonoBehaviour
         string json = JsonUtility.ToJson(fileData);
 
         //Sergio 22/05/2024
-        AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3 };
+        AudioClip[] waitSounds = new AudioClip[] { waitSound1, waitSound2, waitSound3, waitSound4 };
         AudioClip waitSound = waitSounds[UnityEngine.Random.Range(0, waitSounds.Length)];
         ControllerSound.Instance.ExecuteSound(waitSound);
+        AnimationWait(); // Omar 29/05/2024
+        // Iniciar la corutina para esperar al final del audio y cambiar la animación
+        //StartCoroutine(SynchronizeAnimationWithAudio(waitSound.length, PlayResponseClip));
         //Fin Sergio
 
         var request = new UnityWebRequest("https://h3f4f43iybmddlglvzxbe23ksm0yampi.lambda-url.us-east-2.on.aws/", "POST");
@@ -163,13 +213,24 @@ public class Avatar : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success) {
             Debug.LogError("Status Code: " + request.responseCode + " Message: " + request.downloadHandler.text);
-            } 
+            //Sergio 23/05/2024
+            error = true;//Sergio 05/06/2024
+            responseClip = errorSound;
+            if (!ControllerSound.Instance.IsPlaying()) {           
+                PlayResponseClip();
+            } else {
+                //Esperar que termine el audio de espera
+                ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
+            }
+            //Fin Sergio
+        } 
         else {
             var jsonResponse = request.downloadHandler.text;
             Debug.Log(jsonResponse);
             // Analizar el JSON
             ResponseApi response = JsonUtility.FromJson<ResponseApi>(jsonResponse);
             string audioBase64 = response.response_gpt_voice_base64;
+            action = response.action;//Sergio 08/06/2024
 
             background.Clear();
             background.AddRange(response.background_updated);
@@ -181,11 +242,21 @@ public class Avatar : MonoBehaviour
             UnityWebRequest requestAudio = UnityWebRequestMultimedia.GetAudioClip(_uri, AudioType.MPEG);
             yield return requestAudio.SendWebRequest();
 
-            if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError))
-                Debug.LogError(requestAudio.error);
-                
+            if (requestAudio.result.Equals(UnityWebRequest.Result.ConnectionError)){
+                //Sergio 24/05/2024
+                error = true;//Sergio 05/06/2024
+                responseClip = errorSound;
+                if (!ControllerSound.Instance.IsPlaying()) {
+                    PlayResponseClip();
+                } else {
+                    //Esperar que termine el audio de espera
+                    ControllerSound.SoundCompleted += WaitForSoundAndPlayResponse;
+                }
+                //Fin Sergio
+            }    
             else {
                 //Sergio 22/05/2024
+                error = false;//Sergio 05/06/2024
                 responseClip = DownloadHandlerAudioClip.GetContent(requestAudio);
                 if (!ControllerSound.Instance.IsPlaying()) { //se terminó de reproducir el audio de espera
                     PlayResponseClip();
@@ -198,18 +269,6 @@ public class Avatar : MonoBehaviour
         }
     }
 
-    private IEnumerator StopAnimationWhenAudioEnds(AnimationState animationState) 
-    {
-        yield return new WaitForSeconds(clip.length);
-        // Detener la animación después de que el audio termine
-        avatarAnimation.Stop("Explicar");
-
-        // Opcionalmente, restablecer la animación al primer frame
-        animationState.time = 0;
-        avatarAnimation.Sample();
-        avatarAnimation.Stop();
-    }
-
     //Sergio 22/05/2024
     public void WaitForSoundAndPlayResponse() {
         ControllerSound.SoundCompleted -= WaitForSoundAndPlayResponse;
@@ -219,25 +278,26 @@ public class Avatar : MonoBehaviour
     //Sergio 22/05/2024
     public void PlayResponseClip() {
         // Suscribirse al evento que indica cuando terminó de reproducirse la respuesta
-        ControllerSound.SoundCompleted += CompletedResponse;
+        //Sergio 05/06/2024
+        if(error || action.ToLower() == "descansar") {
+            ControllerSound.SoundCompleted += CompletelyInactivated;
+        }
+        else {
+            ControllerSound.SoundCompleted += StartRecording;
+        }
+        //fin Sergio
         ControllerSound.Instance.ExecuteSound(responseClip);
-        animationState = avatarAnimation["Explicar"];
-        animationState.wrapMode = WrapMode.Loop;
-        // Iniciar la animación en bucle
-        avatarAnimation.Play("Explicar");
+        AnimationExplain();
     }
 
-    public void CompletedResponse(){// funcion que se invoca cuando se terminó de reroducir la respuesta
-        //Sergio 22/05/2024
-        avatarAnimation.Stop("Explicar");
-        animationState.time = 0;
-        avatarAnimation.Sample();
-        avatarAnimation.Stop();
-        //Fin Sergio
-        ControllerSound.SoundCompleted -= CompletedResponse; //desuscribirse al evento del audio de la respuesta
+    public void CompletelyInactivated(){
+        active = false;//Sergio 05/06/2024
+        ControllerSound.SoundCompleted -= CompletelyInactivated; //desuscribirse al evento del audio de la respuesta
         //es importante desuscribirse y suscribirse solo cuando es necesario, porque son dos clases quienes usan los eventos de ControllerSound
-        Completed?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
+        Inactivated?.Invoke();// se dispara el evento indicando que se terminó de reproducir el audio
+        AnimationStand();
     }
+    
 
     [System.Serializable]
     public class FileData {
@@ -248,10 +308,46 @@ public class Avatar : MonoBehaviour
     public class ResponseApi {
         public string response_gpt_voice_base64;
         public List<DataGPT> background_updated;
+        public string action; //Sergio 08/06/2024
     }
     [System.Serializable]
     public class DataGPT {
         public string role;
         public string content;
+    }
+        //Animaciones
+    public void AnimationWait() // Animacion Esperar
+    {       
+         avatarAnimator.SetTrigger(WaitTrigger);
+         StartCoroutine(ReturnToStandAfterAnimation("Wait"));//Sergio 05/06/2024
+    }
+
+    public void AnimationStand()
+    {
+        avatarAnimator.SetTrigger(StandTrigger);
+    }
+
+    public void AnimationExplain()
+    {
+        // Sincronizar la animación "Explain" con el audio y cambiar a "Stand" cuando termine
+        avatarAnimator.SetTrigger(ExplainTrigger);
+        // StartCoroutine(ReturnToStandAfterAnimation("Explain"));
+    }
+    //Sergio 05/06/2024
+    private IEnumerator ReturnToStandAfterAnimation(string animationName) {
+        yield return new WaitUntil(() => !avatarAnimator.GetCurrentAnimatorStateInfo(0).IsName(animationName));
+        AnimationStand();
+    }
+    //fin sergio
+
+    public void AnimationListen()
+    {
+        avatarAnimator.SetTrigger(GreetingsTrigger);
+    }
+
+    public void AnimationInactive()
+    {
+        avatarAnimator.SetTrigger(InactiveTrigger);
+        StartCoroutine(ReturnToStandAfterAnimation("Inactive"));
     }
 }

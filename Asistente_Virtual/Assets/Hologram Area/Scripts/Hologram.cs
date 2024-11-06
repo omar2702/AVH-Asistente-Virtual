@@ -30,7 +30,16 @@ public class Hologram : MonoBehaviour
 
     void Scale()
     {
-        transform.localScale = new Vector3(4, 5, 4);
+        // Verificar si es una tablet (o un dispositivo con una pantalla grande)
+        if (Screen.width >= 1200 && Screen.height >= 1600)  // Esto es solo un ejemplo
+        {
+            // Aquí puedes ajustar la escala para tablets
+            transform.localScale = new Vector3(1.5f, 1.5f, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(4, 7, 4);
+        }
     }
 
     void CameraRotation()
